@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, send_file, render_template_string
+from flask import Flask, request, send_file, render_template
 from PIL import Image
 
 def genData(data):
@@ -75,65 +75,18 @@ def decode(image_path):
         if (pixels[-1] % 2 != 0):
             return data
 
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>StegoSafe | Open Innovation</title>
-    <style>
-        body { background-color: #0d0d0d; color: #00ff41; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        h1 { border-bottom: 2px solid #00ff41; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        .container { display: flex; flex-wrap: wrap; gap: 50px; margin-top: 20px; justify-content: center; }
-        .box { border: 1px solid #00ff41; padding: 30px; width: 300px; background: #111; box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); }
-        input, button { width: 100%; margin-top: 15px; padding: 12px; background: #000; color: #fff; border: 1px solid #333; box-sizing: border-box; }
-        button { background: #00ff41; color: #000; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
-        button:hover { background: #00cc33; box-shadow: 0 0 10px #00ff41; }
-        .note { font-size: 10px; color: #666; margin-top: 5px; }
-        .result { margin-top: 20px; padding: 10px; border: 1px dashed #00ff41; word-wrap: break-word; }
-    </style>
-</head>
-<body>
-    <h1>STEGO_SAFE // VIBEHACKS 2.0</h1>
-    <div class="container">
-        <div class="box">
-            <h2>&gt; ENCRYPT DATA</h2>
-            <form action="/encrypt" method="post" enctype="multipart/form-data">
-                <label>1. Upload Carrier Image</label>
-                <input type="file" name="file" required>
-                <label>2. Secret Message</label>
-                <input type="text" name="secret_text" placeholder="Confidential data..." required>
-                <button type="submit">INJECT DATA</button>
-            </form>
-            <p class="note">Output will be a .PNG file.</p>
-        </div>
-
-        <div class="box">
-            <h2>&gt; DECRYPT DATA</h2>
-            <form action="/decrypt" method="post" enctype="multipart/form-data">
-                <label>1. Upload Modified Image</label>
-                <input type="file" name="file" required>
-                <button type="submit">EXTRACT DATA</button>
-            </form>
-            {% if message %}
-            <div class="result">
-                <strong>DECODED:</strong><br>
-                {{ message }}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</body>
-</html>
-"""
-
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template_string(HTML_TEMPLATE)
+    return render_template('opening.html')
+
+@app.route('/terminal', methods=['GET'])
+def terminal():
+    return render_template('terminal.html')
 
 @app.route('/encrypt', methods=['POST'])
 def encrypt_route():
@@ -141,12 +94,12 @@ def encrypt_route():
     if 'file' not in request.files: return "No file", 400
     file = request.files['file']
     text = request.form.get('secret_text', '')
-    
+
     if file.filename == '': return "No selected file", 400
-    
+
     filepath = os.path.join(UPLOAD_FOLDER, "temp_upload.png")
     file.save(filepath)
-    
+
     output_path = os.path.join(UPLOAD_FOLDER, "secret_output.png")
     try:
         encode(filepath, text, output_path)
@@ -160,13 +113,13 @@ def decrypt_route():
     if 'file' not in request.files: return "No file", 400
     file = request.files['file']
     if file.filename == '': return "No selected file", 400
-    
+
     filepath = os.path.join(UPLOAD_FOLDER, "temp_decode.png")
     file.save(filepath)
-    
+
     try:
         secret = decode(filepath)
-        return render_template_string(HTML_TEMPLATE, message=secret)
+        return render_template('terminal.html', message=secret)
     except Exception as e:
         return f"Error decoding: {e}"
 

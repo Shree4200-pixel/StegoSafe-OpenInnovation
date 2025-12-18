@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StegoSafe - Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+        }
+        .cyber-glow {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .terminal-window {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00FF41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+        .terminal-header {
+            background: #00FF41;
+            color: #050505;
+            padding: 8px 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00FF41;
+            color: #00FF41;
+            padding: 12px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .cyber-input:focus {
+            box-shadow: 0 0 15px #00FF41;
+            border-color: #00FF41;
+        }
+        .cyber-input::placeholder {
+            color: rgba(0, 255, 65, 0.5);
+        }
+        .cyber-button {
+            background: transparent;
+            border: 2px solid #00FF41;
+            color: #00FF41;
+            padding: 16px 32px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .cyber-button:hover {
+            box-shadow: 0 0 30px #00FF41;
+            border-color: #00FF41;
+        }
+        .cyber-button:active {
+            transform: scale(0.98);
+        }
+        .drop-zone {
+            border: 2px solid #00FF41;
+            background: rgba(0, 255, 65, 0.02);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .drop-zone.drag-over {
+            border-color: #00FF41;
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 30px #00FF41;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-2 text-cyan-400 cyber-glow">
+                <i class="fas fa-terminal mr-4"></i>StegoSafe Terminal
+            </h1>
+            <div class="text-sm tracking-widest text-green-400">
+                [ STEGANOGRAPHY PROTOCOL ]
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- ENCRYPTION PANEL -->
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <i class="fas fa-lock"></i> ENCRYPTION MODULE
+                </div>
+                <div class="p-6">
+                    <form action="/encrypt" method="POST" enctype="multipart/form-data" id="encryptForm">
+                        <!-- Carrier Image Drop Zone -->
+                        <div class="mb-6">
+                            <label class="block text-green-400 mb-2 text-sm tracking-wider">CARRIER IMAGE</label>
+                            <div class="drop-zone" id="carrierDropZone">
+                                <input type="file" name="file" id="carrierImage" accept="image/*" class="hidden" required>
+                                <div class="h-48 flex flex-col items-center justify-center cursor-pointer" id="carrierPreview">
+                                    <i class="fas fa-image text-5xl mb-4 text-green-400"></i>
+                                    <p class="text-green-400 text-center" id="carrierText">DROP IMAGE HERE</p>
+                                    <p class="text-xs mt-2 text-green-300">Drag & Drop or Click to Upload</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secret Message Input -->
+                        <div class="mb-6">
+                            <label class="block text-green-400 mb-2 text-sm tracking-wider">SECRET MESSAGE</label>
+                            <textarea
+                                name="secret_text"
+                                id="secretMessage"
+                                rows="4"
+                                class="cyber-input"
+                                placeholder="Enter your secret message..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <!-- Inject Button -->
+                        <button type="submit" class="cyber-button w-full">
+                            <i class="fas fa-syringe mr-2"></i> ENCRYPT DATA
+                        </button>
+                        <button type="button" class="cyber-button w-full mt-4" onclick="clearEncryptForm()">
+                            <i class="fas fa-eraser mr-2"></i> CLEAR FORM
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- DECRYPTION PANEL -->
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <i class="fas fa-unlock"></i> DECRYPTION MODULE
+                </div>
+                <div class="p-6">
+                    <form action="/decrypt" method="POST" enctype="multipart/form-data" id="decryptForm">
+                        <!-- Encrypted Image Drop Zone -->
+                        <div class="mb-6">
+                            <label class="block text-green-400 mb-2 text-sm tracking-wider">ENCRYPTED IMAGE</label>
+                            <div class="drop-zone" id="encryptedDropZone">
+                                <input type="file" name="file" id="encryptedImage" accept="image/*" class="hidden" required>
+                                <div class="h-48 flex flex-col items-center justify-center cursor-pointer" id="encryptedPreview">
+                                    <i class="fas fa-file-image text-5xl mb-4 text-green-400"></i>
+                                    <p class="text-green-400 text-center" id="encryptedText">DROP IMAGE HERE</p>
+                                    <p class="text-xs mt-2 text-green-300">Drag & Drop or Click to Upload</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Extract Button -->
+                        <button type="submit" class="cyber-button w-full">
+                            <i class="fas fa-download mr-2"></i> DECRYPT DATA
+                        </button>
+                        <button type="button" class="cyber-button w-full mt-4" onclick="clearDecryptForm()">
+                            <i class="fas fa-eraser mr-2"></i> CLEAR FORM
+                        </button>
+                    </form>
+
+                    <!-- Decryption Result -->
+                    {% if message %}
+                    <div id="decryptResult" class="mt-6">
+                        <div class="inline-block px-4 py-2 mb-4 bg-green-400 text-black font-bold">
+                            <i class="fas fa-check-circle mr-2"></i>DECRYPTION COMPLETE
+                        </div>
+                        <div class="terminal-window">
+                            <div class="p-4 text-green-400" id="extractedMessage">{{ message }}</div>
+                        </div>
+                        <button class="cyber-button mt-4 w-full" onclick="clearDecryptResult()">
+                            <i class="fas fa-trash mr-2"></i> CLEAR RESULT
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-12 text-xs text-green-300">
+            <p>StegoSafe - Secure Data Hiding in Images</p>
+            <a href="/" class="inline-block mt-4 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded">
+                <i class="fas fa-home mr-2"></i>BACK TO HOME
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        // File Drop Zone Handlers
+        function setupDropZone(dropZoneId, inputId, previewId, textId) {
+            const dropZone = document.getElementById(dropZoneId);
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const text = document.getElementById(textId);
+
+            // Click to upload
+            dropZone.addEventListener('click', () => input.click());
+
+            // Drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('drag-over');
+                    text.textContent = 'DROP HERE';
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    input.files = files;
+                    handleFile(files[0], preview, text);
+                }
+            }, false);
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFile(e.target.files[0], preview, text);
+                }
+            });
+        }
+
+        function handleFile(file, previewElement, textElement) {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewElement.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" class="max-h-32 max-w-full object-contain rounded">
+                    `;
+                    textElement.textContent = 'IMAGE LOADED';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        setupDropZone('carrierDropZone', 'carrierImage', 'carrierPreview', 'carrierText');
+        setupDropZone('encryptedDropZone', 'encryptedImage', 'encryptedPreview', 'encryptedText');
+
+        // Clear Functions
+        function clearEncryptForm() {
+            document.getElementById('encryptForm').reset();
+            document.getElementById('carrierPreview').innerHTML = `
+                <i class="fas fa-image text-5xl mb-4 text-green-400"></i>
+                <p class="text-green-400 text-center" id="carrierText">DROP IMAGE HERE</p>
+                <p class="text-xs mt-2 text-green-300">Drag & Drop or Click to Upload</p>
+            `;
+        }
+
+        function clearDecryptForm() {
+            document.getElementById('decryptForm').reset();
+            document.getElementById('encryptedPreview').innerHTML = `
+                <i class="fas fa-file-image text-5xl mb-4 text-green-400"></i>
+                <p class="text-green-400 text-center" id="encryptedText">DROP IMAGE HERE</p>
+                <p class="text-xs mt-2 text-green-300">Drag & Drop or Click to Upload</p>
+            `;
+        }
+
+        function clearDecryptResult() {
+            const result = document.getElementById('decryptResult');
+            if (result) result.remove();
+        }
+    </script>
+</body>
+</html>
